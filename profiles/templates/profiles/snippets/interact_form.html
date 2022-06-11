@@ -1,0 +1,10 @@
+{% url 'profiles:single' slug=target.slug as single_url %}
+<form class='interact-form' data-index='{{target.slug}}' action="{% url 'profiles:interact' %}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="target_slug" value="{{target.slug}}">
+  {% if current_user in target.followers.all %}
+  <button type="submit" class='btn btn-outline-{% if request.path == single_url %}light{% else %}dark{% endif %}' name="button">Unfollow</button>
+  {% else %}
+  <button type="submit" class='btn btn-outline-{% if request.path == single_url %}light{% else %}dark{% endif %}' name="button">Follow</button>
+  {% endif %}
+</form>

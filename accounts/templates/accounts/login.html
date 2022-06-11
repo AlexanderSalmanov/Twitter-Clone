@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% url 'accounts:login' as action_url %}
+{% block content %}
+  <div class="auth-form-box">
+    <form method="post">
+
+    <h1>Log In</h1>
+
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <div class="d-grid gap-3">
+      <button type="submit" class='btn btn-primary mt-3' name="button">Log In</button>
+    </div>
+
+    <p class='text-muted'>Don't have an account? <a href="{% url 'accounts:register' %}">Sign Up.</a></p>
+    </form>
+  </div>
+{% endblock %}

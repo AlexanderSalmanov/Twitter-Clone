@@ -1,0 +1,55 @@
+{% load static %}
+<div class="row my-3">
+  <div class="col-2">
+    <img src="{% if item.profile_pic %}{{item.profile_pic.url}}{% else %}{% static 'images/tweets/no_photo_placeholder.png' %}{% endif %}" class='tweet-profile-image'>
+  </div>
+
+  <div class="col-8">
+    <div class="d-flex flex-column">
+      <h4><a href="{% if item == current_profile %}{% url 'profiles:my' %}{% else %}{{item.get_absolute_url}}{% endif %}">{{item.nickname}}</a></h4>
+      <i><p class='text-muted'>@{{item.username}}</p></i>
+      <p class='text-muted'>
+        {{item.reading_count}} reading <span class='{{item.nickname}}-followers'>{{item.followers_count}}</span> followers</p>
+      <p>{{item.bio|truncatewords:30}}</p>
+      <hr>
+    </div>
+  </div>
+  <div class="col-2 d-flex align-items-center">
+    {% if item == current_profile %}
+      <button type="button" class='btn btn-outline-dark disabled' name="button">You</button>
+    {% else %}
+      {% include 'profiles/snippets/interact_form.html' with current_user=current_user target=item %}
+    {% endif %}
+
+  </div>
+
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    // search results page follow-unfollow AJAX
+    var interactForm = $("[data-index='{{item.slug}}']");
+    interactForm.submit(function(e){
+      e.preventDefault();
+      var $this = $(this);
+      var $data = $this.serialize();
+      var $btn = $this.find("[type='submit']");
+      $.ajax({
+        url: "{% url 'profiles:interact' %}",
+        type: "POST",
+        data: $data,
+        success: function(json){
+          $(".{{item.nickname}}-followers").text(json.follower_count);
+          if (json.followed) {
+            $btn.text('Unfollow');
+          }else if (json.unfollowed) {
+            $btn.text('Follow');
+          }
+        },
+        error: function(err){
+          console.log(err)
+        }
+      })
+    })
+  })
+</script>

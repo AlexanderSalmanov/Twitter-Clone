@@ -1,0 +1,50 @@
+{% url 'profiles:my' as my_profile_url %}
+{% url 'tweets:feed' as feed_url %}
+{% url 'tweets:followed' as followed_section_url %}
+{% url 'home' as home_url %}
+<nav class="navbar navbar-light bg-light fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'hello' %}"><i class='fa fa-twitter-square'></i> Welcome to my Twitter{% if user.is_authenticated %}, {{user.get_full_name}}{% else %}!{% endif %}</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Navigation</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == feed_url %}active{% endif %}" aria-current="page" href="{% url 'tweets:feed' %}"><i class='fa fa-bell'></i> Feed</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == my_profile_url %}active{% endif %}" href="{% url 'profiles:my' %}"><i class='fa fa-user-circle'></i>
+                My Profile {% if not user.is_authenticated %} <span class='text-muted'>(Only for logged in users!)</span> {% endif %}
+             </a>
+          </li>
+          <li class='nav-item'>
+            <a class='nav-link {% if request.path == followed_section_url %}active{% endif %}' href="{% url 'tweets:followed' %}"><i class='fa fa-vcard'></i> Followed Section</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="offcanvasNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class='fa fa-user-circle-o'></i> Authentication
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="offcanvasNavbarDropdown">
+              {% if user.is_authenticated %}
+              <li><a href="{% url 'accounts:logout' %}" class='dropdown-item'><i class='fa fa-sign-out'></i> Log Out</a></li>
+              {% else %}
+              <li><a href="{% url 'accounts:register' %}" class='dropdown-item'> <i class='fa fa-plus'></i> Sign Up</a> </li>
+              <li> <a href="{% url 'accounts:login' %}" class='dropdown-item'><i class='fa fa-sign-in'></i> Log In</a> </li>
+              {% endif %}
+            </ul>
+          </li>
+        </ul>
+        <form class="d-flex" action="{% url 'search:profiles' %}">
+          <input class="form-control me-2" type="search" placeholder="Search for people!" name='q' aria-label="Search">
+          <button class="btn btn-outline-success" type="submit"><i class='fa fa-search'></i> Search</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</nav>

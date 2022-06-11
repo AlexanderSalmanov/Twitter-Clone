@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}<br><br><br>
+<div class="col-md-6 mx-auto w-100 text-center">
+      <div class="h-100 p-5 bg-light border rounded-3">
+        <h2 class='display-5'>Only followed profiles' tweets.</h2>
+        <p class='lead'>Watch only the most relevant tweets. This section is all about the persons you're reading.</p>
+      </div>
+</div>
+{% for tweet in tweets %}
+
+  {% include 'tweets/snippets/tweet.html' with tweet=tweet %}
+
+
+{% endfor %}
+{% endblock %}

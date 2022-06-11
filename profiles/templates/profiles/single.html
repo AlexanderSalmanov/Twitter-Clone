@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% url 'profiles:add_bio' as bio_form_url %}
+{% url 'tweets:new' as tweet_add_url %}
+{% block content %}<br><br>
+<div class="row">
+  <div class="col">
+    <div class="h-100 p-5 text-white {% if request.user == profile.user %}bg-success{% else %}bg-primary{% endif %} rounded-3">
+      <div class="profile-header d-flex justify-content-between mb-3">
+
+        <div class="d-flex flex-column">
+            <h2 class='display-5'>{% if request.user == profile.user %}My Profile{% else %}{{profile.nickname}}{% endif %}</h2>
+            <!-- THE NEXT P TAG IS ONLY FOR ENABLING FORMS AUTOFILL WORK PROPERLY -->
+            <p hidden='true' id='{{profile.nickname}}-nick-now'>{{profile.nickname}}</p>
+
+            <i><p>@<span id='{{profile.username}}-username-now'>{{profile.username}}</span></p></i>
+        </div>
+
+        {% if profile.profile_pic %}
+        <img src="{{profile.profile_pic.url}}" style='border-radius: 50%' height='150px' width='150px' webkit-user-selectable='false' user-selectable='false'>
+        {% endif %}
+      </div>
+      <div class="d-inline-flex gap-3 mb-3">
+        {% include 'profiles/snippets/dropdown.html' with users_type='reading' needed_users='Reading' profile=profile %}
+        {% include 'profiles/snippets/dropdown.html' with users_type='followers' needed_users='Followers' profile=profile %}
+        {% if request.user == profile.user %}
+        <button type="button" class='btn btn-outline-light' name="button" data-bs-toggle='modal' data-bs-target='#settings_modal'><i class='fa fa-cog'></i> Edit Profile!</button>
+        {% with form_class=profile.username %}
+          {% include 'base/modal.html' with action_url='profile_settings_url' form_class=form_class form=settings_form modal_id='settings_modal' form_title='Edit Profile' modal_label='profile_settings' %}
+        {% endwith %}
+        {% endif %}
+      </div>
+          <h3 class='mb-3'><i>{{profile.nickname}}'s personal info.</i></h3>
+
+            <div class="d-flex justify-content-between">
+
+              <p>{% if profile.bio %}{{profile.bio|safe}}{% else %}No bio provided.{% endif %}</p>
+
+            {% if request.user == profile.user %}
+
+            <br><button class="btn btn-outline-light mt-3" data-bs-toggle='modal' data-bs-target='#tweet_form' type="button"> <i class='fa fa-pencil'></i> Tweet something!</button>
+            {% include 'base/modal.html' with modal_id='tweet_form' modal_label='Tweet something!' action_url='tweet_form_url' form_class='tweet_add_form' form_title='Whats Up?' form=tweet_form %}
+            {% else %}
+            {% include 'profiles/snippets/interact_form.html' with current_user=current_user target=profile %}
+            {% endif %}
+          </div>
+  </div>
+</div>
+
+
+  <ul class="nav nav-tabs d-flex justify-content-center" id="myTab" role="tablist" >
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="user-tweets-tab" data-bs-toggle="tab" data-bs-target="#user-tweets" type="button" role="tab" aria-controls="user-tweets" aria-selected="true">
+      <b>
+      {% if request.user == profile.user %} Your Tweets
+      {% else %} {{profile.nickname}}'s Tweets
+      {% endif %}
+      </b>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">
+      <b>
+      {% if request.user == profile.user %} Your Likes
+      {% else %} {{profile.nickname}}'s Likes
+      {% endif %}
+      </b>
+    </button>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="user-tweets" role="tabpanel" aria-labelledby="user-tweets-tab">
+
+    {% for tweet in profile_all_tweets %}
+
+      {% include 'tweets/snippets/tweet.html' with tweet=tweet profile=profile %}
+
+
+    {% empty %}
+    <div class="empty-placeholder">
+      <h1 class='display-4 mt-2' align='center'>No tweets yet.</h1>
+    </div>
+
+
+    {% endfor %}
+
+  </div>
+  <div class="tab-pane fade {{profile.nickname}}-likes-tab" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+    {% for tweet in likes %}
+      {% include 'tweets/snippets/tweet.html' with tweet=tweet profile=profile %}
+    {% empty %}
+    <div class="empty-placeholder">
+      <h1 class='display-4 mt-2' align='center'>No likes yet.</h1>
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+</div>
+
+  <script type="text/javascript">
+
+    // function for counting remaining characters in the form
+    function countChar(val){
+      var len = val.value.length;
+      var textInput = document.getElementById('bio-input')
+      if(len >= 200){
+        val.value = val.value.substring(0, 200);
+        textInput.setAttribute('readonly', 'true');
+      }else{
+        $('#charCount').text(200-len)
+      };
+    }
+
+    // follow-unfollow ajax functionality
+    var interactForm = $('.interact-form');
+    interactForm.submit(function(e){
+      e.preventDefault();
+      var thisForm = $(this);
+      var formData = thisForm.serialize();
+      var actionButton = thisForm.find("[type='submit']");
+      var myProfileTab = $('.my-profile');
+      $.ajax({
+        url: "{% url 'profiles:interact' %}",
+        type: "POST",
+        data: formData,
+        success: function(json){
+          $('.followers-count').text(json.follower_count);
+          if(json.followed){
+            actionButton.text("Unfollow");
+          }else if (json.unfollowed) {
+            actionButton.text("Follow");
+            myProfileTab.remove();
+          }
+        },
+        error: function(err) {}
+      })
+    })
+
+      // filling settings form with current input values
+    var currentNickname = document.getElementById('{{profile.nickname}}-nick-now')
+    var currentUsername = document.getElementById('{{profile.username}}-username-now')
+
+    var settingsForm = $('.{{profile.username}}')
+    settingsForm.find('.nickname-prompt').attr('value', currentNickname.innerHTML)
+    settingsForm.find('.username-prompt').attr('value', currentUsername.innerHTML)
+
+  </script>
+
+
+{% endblock %}
