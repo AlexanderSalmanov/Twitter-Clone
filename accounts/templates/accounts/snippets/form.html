@@ -1,0 +1,15 @@
+{% load bootstrap4 %}
+{% url 'accounts:register' as register_url %}
+
+<form action="{% if action == 'register' %}{% url 'accounts:register' %}{% else %}{% url 'accounts:login' %}{% endif %}" method="post">
+  {% if next_url %}
+  <input type="hidden" name="next" value="{{next_url}}">
+  {% endif %}
+
+  {% csrf_token %}
+  {% bootstrap_form form %}
+  <div class="d-grid gap-3">
+    <input type="submit" class='btn btn-block btn-primary mt-3' value="{% if request.path == register_url %}Register{% else %}Login{% endif %}">
+  </div>
+
+</form>

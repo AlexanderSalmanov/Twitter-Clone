@@ -1,0 +1,48 @@
+<div class="dropdown {{users_type}}-dropdown">
+  <button type="button" class='btn btn-outline-light' name="button" data-bs-toggle='dropdown' id="{{users_type}}_dropdown">
+    <i class='fa fa-users'></i>
+
+    {% if users_type == 'followers' %}
+    <span class='followers-count'>{{profile.followers.count}}</span>
+    {% elif users_type == 'reading' %}
+    <span class='reading-count'>{{profile.reading.count}}</span>
+    {% endif %}
+
+     {{needed_users}}
+  </button>
+  <ul class='dropdown-menu {{users_type}}_dropdown' aria-labelledby="#{{users_type}}_dropdown">
+  {% if users_type == 'followers' %}
+    {% for user in profile.followers.all %}
+    {% if user.profile == current_profile %}
+      <li class='dropdown-item my-profile'>
+        <a href="{% url 'profiles:my' %}" class='dropdown-item'>{{current_profile.nickname}} <span class='text-muted'>(You)</span></a>
+      </li>
+    {% else %}
+      <li class='dropdown-item'>
+        <a href="{{user.profile.get_absolute_url}}" class='dropdown-item'>{{user.profile.nickname}}</a>
+      </li>
+    {% endif %}
+    {% empty %}
+    <li class='dropdown-item disabled'>
+      <a class='dropdown-item text-muted'>No followers yet.</a>
+    </li>
+    {% endfor %}
+  {% elif users_type == 'reading' %}
+    {% for user in profile.reading.all %}
+      {% if user.profile == current_profile %}
+      <li class='dropdown-item my-profile'>
+        <a href="{% url 'profiles:my' %}" class='dropdown-item'>{{current_profile.nickname}} <span class='text-muted'>(You)</span></a>
+      </li>
+      {% else %}
+      <li class='dropdown-item'>
+        <a href="{{user.profile.get_absolute_url}}" class='dropdown-item'>{{user.profile.nickname}}</a>
+      </li>
+      {% endif %}
+      {% empty %}
+      <li class='dropdown-item disabled'>
+        <a class='dropdown-item text-muted'>No profiles being read at the moment.</a>
+      </li>
+    {% endfor %}
+  {% endif %}
+  </ul>
+</div>

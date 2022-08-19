@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}<br><br>
+  <div class="h-100 p-5 text-white bg-{% if results.count == 0 %}danger{% else %}info{% endif %} rounded-3 text-center">
+    <h1 class='display-4'>
+    {% if not query == '*' %}
+      {% if results.count != 0 %}{{results.count}} profile{{results.count|pluralize}} found for '{{query}}'
+      {% else %}No profiles matching '{{query}}' found.
+      {% endif %}</h1>
+    {% else %}
+      Listing all profiles. {{results.count}} by now.
+    {% endif %}
+  </div>
+  <div class="results-box">
+
+
+  {% for item in results %}
+    <!-- <a href="{% url 'profiles:single' slug=item.slug %}">{{item.nickname}}</a> -->
+    {% include 'search/snippets/search-item.html' with item=item %}
+
+  {% endfor %}
+  </div>
+  {% if results.count == 0 %}
+
+    <img src="{% static 'images/search/sad.png' %}" class='d-block mx-auto pt-5' margin='auto' alt="">
+
+
+  {% endif %}
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var resultsBox = $('.results-box');
+      var boxHeight = resultsBox.height();
+      console.log(boxHeight)
+      var maxHeight = 534;
+      if (boxHeight > maxHeight) {
+        resultsBox.css('overflow-x', 'hidden');
+        resultsBox.css('overflow-y', 'scroll');
+        resultsBox.css('height', maxHeight)
+      }
+    })
+  </script>
+
+
+{% endblock %}

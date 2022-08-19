@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<br><br>
+<main class='d-flex h-100 text-center my-auto'>
+  <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+
+
+    <main class="px-3">
+      <h1>This is my own Twitter-clone project.</h1>
+      <p class="lead">This project is on the development stage. Currently struggling to manage the likes functionality concurrently improving some side featues.
+      My main mission is to recreate feed, like, retweet and response functionality in order to upload this project to my GitHub profile.
+      And I shouldn't forget about code refactoring to escape "spaghetti" code! :)</p>
+      <p class="lead">
+        <a href="{% url 'tweets:feed' %}" class="btn btn-lg btn-secondary fw-bold border-white bg-dark text-white">Go to feed</a>
+      </p>
+    </main>
+
+  </div>
+</main>
+
+{% endblock %}

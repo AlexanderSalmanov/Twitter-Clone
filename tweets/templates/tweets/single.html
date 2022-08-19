@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br><br>
+
+
+    {% if conversation %}
+
+      {% for tweet in conversation_tweets %}
+
+        {% include 'tweets/snippets/tweet.html' with tweet=tweet %}
+
+      {% empty %}
+        <h1 class='display-4' align='center'>Nothing to see here.</h1>
+      {% endfor %}
+
+    {% else %}
+
+      {% include 'tweets/snippets/tweet.html' with tweet=tweet %}
+
+    {% endif %}
+
+    <div class="d-grid">
+      <button type="button" class='btn btn-outline-primary' data-bs-toggle='modal' data-bs-target='#respond-modal-form'>Respond to tweet</button>
+      {% include 'base/modal.html' with modal_id='respond-modal-form' form_class='response-form' tweet_id=tweet.id modal_label='Response Form' form_title='Say Something!' action_url='respond' form=tweet_form %}
+    </div>
+
+
+{% endblock %}

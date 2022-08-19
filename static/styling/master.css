@@ -1,0 +1,119 @@
+.auth-form-box{
+  margin: auto;
+  max-width: 550px;
+  margin-top: 75px;
+  padding: 25px;
+  background-color: #fff;
+  -webkit-box-shadow: 2px 2px 13px -4px rgba(0, 0, 0, 0.21);
+  box-shadow: 2px 2px 13px -4px rgba(0, 0, 0, 0.21);
+}
+
+.tweet-profile-image{
+  height: 100px;
+  width: 100px;
+  border-radius: 50%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+   user-select: none;
+}
+
+.empty-placeholder{
+  height: 280px;
+}
+
+.tweet-no-image-placeholder{
+  height: 100px;
+  width: 100px;
+  border-radius: 50%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+   user-select: none;
+}
+
+.tweet-caption-image{
+  max-width: 600px;
+  max-height: 400px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+   user-select: none;
+}
+
+.like-btn{
+  color: red;
+}
+
+.like-btn:hover{
+  color: red;
+  transition: 0.3s;
+}
+
+.btn:active:focus{
+  outline: none;
+  box-shadow: none;
+}
+
+.tweet-delete-btn{
+  color: black;
+}
+
+.tweet-delete-btn:hover{
+  color: black;
+}
+
+.respond-btn, .respond-btn:hover{
+  color: black;
+}
+
+.fa-github{
+  font-size: 50px;
+  color: black;
+}
+
+.fa-twitter{
+  font-size: 50px;
+  color: black;
+}
+
+.fa-twitter:hover{
+  color: #1DA1F2;
+  transition: 0.3s;
+}
+
+.fa-linkedin-square{
+  font-size: 50px;
+  color: black;
+}
+
+.fa-linkedin-square:hover{
+  color: #0072b1;
+  transition: 0.3s;
+}
+
+.retweet-btn, .retweet-btn:hover{
+  color: green;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 15px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e1e2e3;
+  border-radius: 10px;
+}

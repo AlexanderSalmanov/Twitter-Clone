@@ -1,0 +1,216 @@
+{% load static %}
+{% url 'profiles:my' as my_profile_url %}
+{% url 'tweets:feed' as feed_url %}
+{% url 'tweets:followed' as followed_url %}
+{% url 'tweets:single' pk=tweet_id as tweet_url %}
+{% url 'profiles:single' slug=profile.slug as single_url %}
+<div class="row my-3 tweet-item" data-index='{{tweet.id}}'>
+
+  <div class="col-9 ">
+    <div class="row">
+      <div class="col-2">
+
+
+        {% if tweet.author.profile_pic %}
+        <img class='tweet-profile-image' src="{{tweet.author.profile_pic.url}}" alt="RESPONSIVE IMAGE">
+        {% else %}
+        <img class='tweet-no-image-placeholder rounded-3' src="{% static 'images/tweets/no_photo_placeholder.png' %}" alt="Error while loading image">
+        {% endif %}
+
+      </div>
+      <div class="col-10">
+
+        {% if tweet.as_response and request.path == tweet_url %}
+
+        <p class='text-muted'>
+        <a href="
+          {% if tweet.author == current_profile %}
+            {% url 'profiles:my' %}
+          {% else %}
+            {% url 'profiles:single' slug=tweet.author.slug %}
+          {% endif %}">
+          <b>
+            {{tweet.author.nickname}}
+          </b>
+        </a> responded to <a href="{% url 'profiles:single' slug=tweet_author_slug %}"><b>{{tweet_author}}</b></a></p>
+
+
+
+        {% endif %}
+
+        {% if tweet in retweets or tweet in my_retweets and request.path != single_url %}
+        <p class='text-muted'><i class='fa fa-retweet'></i> Retweeted from {{tweet.author.nickname}}</p>
+        {% endif %}
+
+        {% if tweet.is_pinned and request.path != feed_url and request.path != followed_url and not tweet in retweets %}
+        <h5 class='text-muted'><i class='fa fa-map-pin'></i> Pinned Tweet</h5>
+        {% endif %}
+
+        <div class="d-flex justify-content-between">
+
+          <h4 class='author-nickname-box'><b>
+            <a href="{% if tweet.author.user == request.user %}{% url 'profiles:my' %}{% else %}{{tweet.author.get_absolute_url}}{% endif %}">
+              {{tweet.author.nickname}}
+            </a> {% if tweet.author.user == request.user %} <span class='text-muted'>(You)</span>{% endif %}
+          </b>
+        </h4>
+          <div class="d-flex justify-content-end">
+            <span class='text-muted px-3'>{{tweet.timestamp|timesince}} ago</span>
+            {% if profile.user == request.user %}
+
+            <div class="dropdown tweet-actions-dropdown">
+              <button type="button" name="button" class='btn btn-light dropdown-toggle' id='tweetDropdown' data-bs-toggle='dropdown'>
+                <i class='fa fa-ellipsis-v'></i>
+              </button>
+              <ul class='dropdown-menu' aria-labelledby='tweetDropdown'>
+                <li class='dropdown-item'>
+                  {% if not tweet.is_pinned %}
+                  <a href="{% url 'tweets:pin' id=tweet.id %}" class='dropdown-link'><i class='fa fa-map-pin'></i> Pin Tweet</a>
+                  {% else %}
+                  <a href="{% url 'tweets:pin' id=tweet.id %}" class='dropdown-link'><i class='fa fa-map-pin'></i> Unpin Tweet</a>
+                  {% endif %}
+                </li>
+
+              </ul>
+            </div>
+
+            {% endif %}
+
+          </div>
+
+        </div>
+        <p class='pb-4'>{{tweet.text}}</p>
+        {% if tweet.image.url != '' %}
+        <p class='mb-4'>
+          <img src="{{tweet.image.url}}" class='tweet-caption-image rounded-3' alt="tweet caption">
+        </p>
+        {% endif %}
+
+        <div class="d-inline-flex tweet-actions">
+
+          <a href="{{tweet.get_absolute_url}}" class='btn btn-link respond-btn' onclick='this.blur();'><i class='fa fa-comment-o'></i>
+             {% if tweet.conversation.responses_count > 0 and not tweet.as_response %}
+             {{tweet.conversation.responses_count}}
+              {% else %}
+              {% endif %}
+            </a>
+
+          <button type="button" class='btn btn-link like-btn' data-index="{{tweet.id}}" onclick="this.blur();">
+            <span id='heart-box{{tweet.id}}'>
+            {% if tweet in current_user_likes %}
+            <i class='fa fa-heart'></i>
+            {% else %}
+            <i class='fa fa-heart-o'></i>
+            {% endif %}
+            </span>
+            <span id='likeCounter{{tweet.id}}'>{{tweet.like_count}}</span>
+          </button>
+
+          <button type="button" data-index="{{tweet.id}}" class='btn btn-link retweet-btn' onclick='this.blur();'>
+            <i class='fa fa-retweet'></i>
+            <span id='retweet-count{{tweet.id}}'>
+              {{tweet.retweet_count}}
+            </span>
+            <span class='text-muted' id='retweet-check{{tweet.id}}'>
+              {% if tweet in my_retweets %}
+
+                <i class='fa fa-check'>
+                </i>
+
+              {% endif %}
+            </span>
+          </button>
+
+          {% if tweet.author == current_profile or tweet in retweets %}
+          <button type="button" class='btn btn-link tweet-delete-btn' data-index="{{tweet.id}}" onclick="this.blur();"><i class="fa fa-trash"></i> Delete tweet</button>
+          {% endif %}
+        </div>
+
+        {% if not tweet.is_pinned %}
+        <hr>
+        {% else %}
+
+        {% endif %}
+      </div>
+    </div>
+    {% if tweet.is_pinned %}
+    <hr>
+    {% endif %}
+  </div>
+</div>
+<script type="text/javascript">
+  $(document).ready(function(){
+
+  // Tweet delete AJAX with button
+  var deleteBtn = $('.tweet-delete-btn', "[data-index='{{tweet.id}}']")
+  deleteBtn.click(function(e){
+    var tweetId = $(this).data('index');
+    $.ajax({
+      url: "{% url 'tweets:delete' id=tweet.id %}",
+      type: "POST",
+      data: {
+        'id': '{{tweet.id}}',
+        'csrfmiddlewaretoken': '{{csrf_token}}'
+      },
+      success: function(json){
+        $(".tweet-item[data-index='" + tweetId + "']").remove();
+        var tweetCount = $("#tweet_count");
+        tweetCount.text(json.tweet_count + 'tweets');
+      },
+      error: function(err){}
+    })
+  })
+
+  // LIKE AJAX ATTEMPT WITH BUTTON ONCLICK
+  var likeBtn = $('.like-btn', "[data-index='{{tweet.id}}']")
+  likeBtn.click(function(){
+  var tweetId = $(this).data('index');
+  $.ajax({
+    url: "{% url 'tweets:like-unlike' id=tweet.id %}",
+    type: "POST",
+    data: {
+      'id': '{{tweet.id}}',
+      'csrfmiddlewaretoken': "{{csrf_token}}"
+    },
+    dataType: 'json',
+    success: function(json){
+      document.getElementById('likeCounter{{tweet.id}}').innerHTML = json.likes_count;
+      if (json.liked){
+        document.getElementById('heart-box{{tweet.id}}').innerHTML = "<i class='fa fa-heart'></i>"
+      }else if(json.unliked){
+        document.getElementById('heart-box{{tweet.id}}').innerHTML = "<i class='fa fa-heart-o'></i>"
+      }
+    },
+    error: function(errmsg){
+      console.log(errmsg)
+    }
+  })
+  })
+
+  // retweet AJAX
+  var retweetBtn = $('.retweet-btn', "[data-index='{{tweet.id}}']")
+  retweetBtn.click(function(){
+  var tweetId = $(this).data('index');
+  $.ajax({
+    url: "{% url 'tweets:retweet' id=tweet.id %}",
+    type: "POST",
+    data: {
+      'id': '{{tweet.id}}',
+      'csrfmiddlewaretoken': "{{csrf_token}}"
+    },
+    success: function(json){
+      document.getElementById('retweet-count{{tweet.id}}').innerHTML = json.retweet_count;
+      if(json.created){
+        document.getElementById('retweet-check{{tweet.id}}').innerHTML = "<i class='fa fa-check'></i>"
+      }else{
+        document.getElementById('retweet-check{{tweet.id}}').innerHTML = " "
+      }
+    },
+    error: function(err){
+
+    }
+  })
+  })
+  })
+
+</script>

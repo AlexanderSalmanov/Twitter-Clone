@@ -1,0 +1,30 @@
+{% load bootstrap4 %}
+<div class="modal fade text-dark" id='{{modal_id}}' tabindex='-1' aria_labelledby='{{modal_label}}' aria-hidden='true'>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class='modal-title' id='{{modal_label}}'>{{form_title}}</h3>
+        <button type="button" data-bs-dismiss='modal' class='btn-close' aria-label='close'></button>
+
+
+      </div>
+      <div class="modal-body">
+        <form enctype="multipart/form-data" action="{% if action_url == 'profile_settings_url' %}{% url 'profiles:settings' %}
+        {% elif action_url == 'respond' %}{% url 'tweets:respond' id=tweet_id %}
+        {% elif action_url == 'tweet_form_url' %}{% url 'tweets:new' %}
+        {% endif %}" method="post" class='{{form_class}}'>
+          {% bootstrap_form form %}
+          <span id='charCount' class='text-muted'></span>
+          {% csrf_token %}
+          <div class="d-grid gap-2 col-6 mx-auto">
+            <button type="submit" class='btn btn-primary mt-2' name="button">Go!</button>
+            <button type="button" data-bs-dismiss='modal' class='btn btn-secondary' name="button">Close</button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+</div>
