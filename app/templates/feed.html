@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load bootstrap5 %}
+
+{% block title %}Feed{% endblock title %}
+
+{% block content %}
+
+    <div class="p-5 mb-4 rounded-3 bg-{{hero_unit_class}} text-white">
+        <h3>
+            {% if request.path == '/' %}
+                Feed 
+            {% else %}
+                Followed section
+            {% endif %}
+        </h3>
+        <h1 class='display-4'>{{hero_unit_msg}}</h1>
+    </div>
+    <main class="m-3">
+        {% for tweet in tweets %}
+            {% include "tweets/snippets/tweet.html" with tweet=tweet %}
+        {% endfor %}
+    </main>
+
+{% endblock content %}

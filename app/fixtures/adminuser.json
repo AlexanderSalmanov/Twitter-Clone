@@ -1,0 +1,19 @@
+[
+{
+    "model": "accounts.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$260000$LBRpSypXcAI3MQxCs92ACV$GD3OsOknhBn1l4z0rR0rZdvo2iRqtrdZuEMpcW9hT7U=",
+        "last_login": "2023-02-02T15:41:19.465Z",
+        "email": "admin@gmail.com",
+        "full_name": null,
+        "created": "2023-02-02T14:39:15.844Z",
+        "updated": "2023-02-02T14:39:15.844Z",
+        "is_active": true,
+        "is_staff": true,
+        "is_superuser": true,
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]

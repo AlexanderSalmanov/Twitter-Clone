@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{query}}{% endblock title %}
+
+{% block content %}
+    
+    <main class="my-3">
+        <div class="p-5 bg-light text-dark fs-3 rounded">
+            <h3>
+                {% if profiles %}
+                    Search results are displayed below.
+                {% else %}
+                    No profiles found for query {{query}}.
+                {% endif %}
+            </h3>
+        </div>
+        {% if profiles %}
+        <div class="search-results-box">
+            {% for profile in profiles %}
+            <div class="d-flex position-relative p-3 border rounded">
+                <img src="{% if profile.profile_pic %}{{profile.profile_pic.url}}{% else %}{% static 'images/no_photo_placeholder.png' %}{% endif %}" class="flex-shrink-0 me-3 profile-pic-medium" alt="...">
+                <div>
+                  <h5 class="mt-0">
+                    <a href="{% if current_profile == profile %}{% url 'profiles:my' %}{% else %}{{profile.get_absolute_url}}{% endif %}">{{profile.nickname}}</a>
+                  </h5>
+                  <small class="text-muted">@{{profile.username}}</small>
+                  <p class="fs-4">{{profile.bio}}</p>
+                  <div class="d-flex gap-3">
+                    <span class="badge bg-primary">{{profile.followers.count}} follower{{profile.followers.count|pluralize}}</span>
+                    <span class="badge bg-primary">{{profile.reading.count}} reading</span>
+                  </div>
+                </div>
+            </div>{% if forloop.counter != profiles.count %}<hr>{% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </main>
+
+{% endblock content %}

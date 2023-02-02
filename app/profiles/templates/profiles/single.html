@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if request.user == profile.user %}
+        My Profile
+    {% else %}
+        {{profile.username}} Profile
+    {% endif %}
+{% endblock title %}
+
+{% block content %}
+    <main class="py-3">
+        <div class="p-5 bg-{% if request.user == profile.user %}success{% else %}primary{% endif %} mb-4 text-white">
+            <div class="d-flex justify-content-between">
+                <div class="d-flex flex-column nick-and-followers">
+                    <h1 class="display-4">
+                        {% if request.user == profile.user %}
+                        My Profile
+                        {% else %}
+                        @{{profile.nickname}} Profile
+                        {% endif %} <br>
+                        <span class="h4">{{profile.nickname}}</span>
+                    </h1>
+                    <div class="d-flex flex-row followers gap-3">
+                        {% include "profiles/snippets/dropdown.html" with dropdown_id="reading_id" dropdown_title="Reading" dropdown_user_types="READING" count=profile.reading_count %}
+                        {% include "profiles/snippets/dropdown.html" with dropdown_id="followers_id" dropdown_title="Followers" dropdown_user_types="FOLLWOGIN" count=profile.followers_count %}
+                    </div>
+                </div>
+                <p hidden="true" id="{{profile.slug}}-nick-now">{{profile.nickname}}</p>
+                <p hidden="true" id="{{profile.slug}}-bio-now">{{profile.bio}}</p>
+                <img src="{% if profile.profile_pic %}{{profile.profile_pic.url}}{% else %}{% static 'images/no_photo_placeholder.png' %}{% endif %}" alt="" class="profile-img shadow">
+            </div>
+
+            
+            <p class="h3 mt-3">User's bio</p><hr>
+            <p class="lead">{{profile.bio}}</p>
+            {% if request.user == profile.user %}
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#profileSettingsForm"><i class="fa fa-cog"></i> Profile settings</button>
+                {% include "base/snippets/modal_form.html" with modal_id="profileSettingsForm" modal_label="profileSettingsLabel" label_text="Change something!" form_id="settingsFormId" form=profile_settings_form form_action=profile_settings_action %}
+                <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#tweetModalForm"><i class="fa fa-pencil"></i> What's new?</button>
+                {% include "base/snippets/modal_form.html" with modal_id="tweetModalForm" modal_label="tweetModalFormLabel" label_text="Tell something!" form_id="tweetFormId" form=tweet_form form_action=tweet_form_action %}
+            </div>
+            {% else %}
+            <div class="d-flex flex-row-reverse">
+                <button class="btn btn-outline-light interact-btn" data-index="{{profile.id}}">
+                    {% if current_profile in profile.followers_who.all %}
+                        Unfollow
+                    {% else %}
+                        Follow
+                    {% endif %}
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <ul class="nav nav-tabs d-flex justify-content-center fs-3" id="tweetsTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="profile-tweets-tab" data-bs-toggle="tab" data-bs-target="#profile-tweets-tab-pane" type="button" role="tab" aria-controls="profile-tweets-tab-pane" aria-selected="true">
+                {% if request.user == profile.user %}
+                    My Tweets 
+                {% else %}
+                    {{profile.nickname}}'s Tweets
+                {% endif %}
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="profile-tweets-responses-tab" data-bs-toggle="tab" data-bs-target="#profile-tweets-responses-tab-pane" type="button" role="tab" aria-controls="profile-tweets-responses-tab-pane" aria-selected="false">
+                    {% if request.user == profile.user %}
+                        My Tweets and Responses 
+                    {% else %}
+                        {{profile.nickname}}'s Tweets and Responses
+                    {% endif %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="profile-likes-tab" data-bs-toggle="tab" data-bs-target="#profile-likes-tab-pane" type="button" role="tab" aria-controls="profile-likes-tab-pane" aria-selected="false">
+                {% if request.user == profile.user %}
+                    My Likes 
+                {% else %}
+                    {{profile.nickname}}'s Likes
+                {% endif %}
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="profile-tweets-tab-pane" role="tabpanel" aria-labelledby="profile-tweets-tab" tabindex="0">
+            {% for tweet in profile_tweets.time_order %}
+                {% include 'tweets/snippets/tweet.html' with tweet=tweet %}
+            {% empty %}
+                <h3 align="center" class="my-3">It's been silent here...</h3>
+            {% endfor %}
+            </div>
+            <div class="tab-pane fade" id="profile-tweets-responses-tab-pane" role="tabpanel" aria-labelledby="profile-tweets-responses-tab" tabindex="0">
+                {% for tweet in profile.tweets.all %}
+                    {% include 'tweets/snippets/tweet.html' with tweet=tweet %}
+                {% empty %}
+                    <h3 align="center" class="my-3">So lonely, isn't it?...</h3>
+                {% endfor %}
+            </div>
+            <div class="tab-pane fade" id="profile-likes-tab-pane" role="tabpanel" aria-labelledby="profile-likes-tab" tabindex="0">
+            {% for tweet in liked_tweets %}
+                {% include 'tweets/snippets/tweet.html' with tweet=tweet %}
+            {% empty %}
+                <h3 align="center" class="my-3">Nothing to show for now...</h3>
+            {% endfor %}
+            </div>
+
+    </main>
+
+
+<script type="text/javascript">
+    $(document).ready(function(){
+
+        // profile settings form autofill
+        var settingsForm = $('#profileSettingsForm')
+        var currentNick = document.getElementById("{{profile.slug}}-nick-now");
+        var currentBio = $("#{{profile.slug}}-bio-now");
+
+        settingsForm.find('#id_nickname').attr('value', currentNick.innerHTML);
+        settingsForm.find('#id_bio').val(currentBio.text())
+
+        // char count section 
+        $("#tweet-text-box").keyup(function(){
+            var inputLength = $(this).val().length;
+            $(".actual").text(inputLength);
+        })
+
+        $(".bio-input-box").keyup(function(){
+            var inputLength = $(this).val().length;
+            $(".actual").text(inputLength)
+        })
+
+        // async follow-unfollow
+        $('.interact-btn').click(function(){
+            var targetId = $(this).data('index');
+            $.ajax({
+                url: "{% url 'profiles:interact' user_id=profile.id %}",
+                type: "POST",
+                data: {
+                    'user_id': targetId,
+                    'csrfmiddlewaretoken': '{{csrf_token}}'
+                },
+                success: function(json){
+                    $('.followers-count').text(json.followers_count);
+                    if (json.followed){
+                        $('.interact-btn').text('Unfollow')
+                    }else if(json.unfollowed) {
+                        $('.interact-btn').text('Follow')
+                    }
+                },
+                error: function(xhr) {}
+            })
+        })
+            })
+  
+</script>
+{% endblock content %}

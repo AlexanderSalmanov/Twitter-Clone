@@ -1,0 +1,196 @@
+{% load static %}
+<main class="my-3">
+  <div class="row">
+    <div class="col-6 d-flex flex-row gap-3">
+      <img src="{% if tweet.author.profile_pic %}{{tweet.author.profile_pic.url}}{% else %}{% static 'images/no_photo_placeholder.png' %}{% endif %}" class="profile-img-thumbnail" style="height: 75px; width: 75px; border-radius: 50%;">
+
+      <div class="d-flex flex-column">
+        {% if tweet in retweets %}
+          <span class="text-muted">
+            <i class="fa fa-retweet"></i>{{profile.nickname}} retweeted from {{tweet.author.nickname}}
+          </span>
+        {% endif %}
+        <h3 class="fs-4 mr-3">
+          <a href="{% if tweet.author.user == request.user %}{% url 'profiles:my' %}{% else %}{{tweet.author.get_absolute_url}}{% endif %}">
+            {{tweet.author.nickname}} 
+          </a>{% if request.user == tweet.author.user %} <span class="text-muted fs-4">(You)</span>{% endif %}
+          {% if tweet.is_reply %}replied to <a href="{% if tweet.reply_to.author.user == request.user %}{% url 'profiles:my' %}{% else %}{{tweet.repply_to.author.get_absolute_url}}{% endif %}">{{tweet.reply_to.author.nickname}}</a>{% endif %}
+        </h3>
+        {% if tweet.branch_start and not 'branch' in request.path %}
+          <a href="{% url 'tweets:branch' tweet_id=tweet.id %}" class="branch-view-link"><i class='fa fa-share-square'></i> View full branch</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-6 d-flex flex-row-reverse gap-2">
+      {% if tweet.author == current_profile %}
+           
+      <div class="dropdown">
+        <button class="btn btn-link mb-5" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path d="M12 18c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-9c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-9c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3z"/>
+          </svg>   
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#tweet{{tweet.id}}ConfirmDeleteModal"><i class="fa fa-trash" style="color:red"></i> Delete</a></li>
+        </ul>
+      </div>
+      <!--
+        TWEET CONFIRM DELETE MODAL
+      -->
+      <div class="modal fade" id="tweet{{tweet.id}}ConfirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-3" id="confirmDeleteModalLabel">Confirm Deletion?</h1>
+            </div>
+            <div class="modal-body">
+              <p class="fs-4">
+                Are you sure you want to delete this tweet?
+              </p>
+              <div class="m-3 border-top border-left border-right">
+                <div class="d-flex justify-content-between gap-3">
+                  <p class="fs-6">{{tweet.text}}</p>
+                  <p class="fs-6 text-muted">{{tweet.created|timesince}} ago</p>
+                </div>
+                {% if tweet.image %}
+                  <div align="center">
+                    <img src="{{tweet.image.url}}" class="tweet-caption-img">
+                  </div>
+              {% endif %}
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back to profile</button>
+              <a href="{% url 'tweets:delete' tweet_id=tweet.id %}" class="btn btn-danger">Delete Tweet</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--
+        TWEET CONFIRM DELETE MODAL
+      -->    
+      {% endif %}
+      <p class="fs-5 text-muted">{{tweet.created|timesince}} ago</p>
+    </div>
+  </div>
+  <div class="tweet-content-box px-3">
+    <p class="fs-5">
+      {{tweet.text}}
+    </p>
+    {% if tweet.image %}
+      <div align="center">
+        <img src="{{tweet.image.url}}" class="tweet-caption-img">
+      </div>
+    {% endif %}
+  </div>
+  <div class="tweet-actions">
+    <div class="d-flex flex-row">
+      <a href="{{tweet.get_absolute_url}}" class="btn btn-link comment-button" onclick="this.blur();"><i class="fa fa-comment-o"></i>
+        {% if not tweet.is_reply %}
+          {{tweet.branch_length}}
+        {% else %}
+          {{tweet.reply_count}}
+        {% endif %}
+      </a>
+      <button type="button" class="btn btn-link retweet-button" id="retweet-btn-{{tweet.id}}" onclick="this.blur();">
+        <i class="fa fa-retweet"></i>
+        <span id="{{tweet.id}}-retweet-count">{{tweet.retweet_count}}</span>
+        <span id="{{tweet.id}}-retweet-check-box">
+          {% if tweet in current_profile_retweets %}<i class="fa fa-check"></i>{% endif %}  
+        </span>
+      </button>
+      <button type="button" class="btn btn-link like-button" id="like-btn-{{tweet.id}}" onclick="this.blur();">
+        <span class="{{tweet.id}}-like-box">
+          <i class="fa {% if tweet in current_profile_likes %}fa-heart{% else %}fa-heart-o{% endif %}"></i>
+        </span>
+        <span id="{{tweet.id}}-like-count">{{tweet.like_count}}</span>
+      </button>
+
+
+      <div class="dropdown">
+        <a class="btn btn-link reply-btn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fa fa-pencil"></i> Reply
+        </a>
+      
+        <div class="dropdown-menu reply-dropdown w-50">
+          <form class="px-4 py-3" method="POST" enctype="multipart/form-data" action="{% url 'tweets:reply' tweet_id=tweet.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="replyText" class="form-label">What would you say??</label>
+              <textarea id="replyText" name="replyText" class="form-control" id="" cols="80" rows="5" maxlength="140"></textarea>
+            </div>
+            <p class="text-muted">
+              <span class="reply-actual">0</span>/<span class="max">140</span>
+            </p>
+            <div class="mb-3">
+              <label for="replyImage" class="form-label">Add caption</label>
+              <input type="file" name="replyImage" accept="image/*" class="form-control" title>
+            </div>
+            <button type="submit" class="btn btn-primary">Reply</button>
+          </form>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</main><hr>
+
+
+<script type="text/javascript">
+  var likeBtn = $("#like-btn-{{tweet.id}}")
+  likeBtn.click(function(){
+    var tweetId = "{{tweet.id}}";
+    $.ajax({
+      url: "{% url 'tweets:like' tweet_id=tweet.id %}",
+      type: "POST",
+      data: {
+        "tweet_id": tweetId,
+        "csrfmiddlewaretoken": "{{csrf_token}}"
+      },
+      dataType: 'json',
+      success: function(json){
+        var likeCounter = document.getElementById('{{tweet.id}}-like-count')
+        likeCounter.innerHTML = json.like_count;
+        var likeBox = $('.{{tweet.id}}-like-box')
+        var heartIcon = likeBox.children('i')[0]
+        if (json.liked){
+          heartIcon.setAttribute('class', 'fa fa-heart')
+        }else if (json.unliked) {
+          heartIcon.setAttribute('class', 'fa fa-heart-o')
+        }
+      },
+      error: function(err, xhr, msg) {}
+    })
+  })
+
+  var retweetBtn = $('#retweet-btn-{{tweet.id}}');
+  retweetBtn.click(function(){
+    var tweetId = '{{tweet.id}}';
+    $.ajax({
+      url: '{{tweet.get_retweet_url}}',
+      type: "POST",
+      data: {
+        'tweet_id': tweetId,
+        'csrfmiddlewaretoken': '{{csrf_token}}'
+      },
+      dataType: 'json',
+      success: function(json){
+        var retweetCounter = $('#{{tweet.id}}-retweet-count');
+        retweetCounter.text(json.retweet_count);
+        var retweetCheckBox = document.getElementById('{{tweet.id}}-retweet-check-box');
+        if (json.created){
+          retweetCheckBox.innerHTML = '<i class="fa fa-check"></i>';
+        } else if(json.deleted){
+          retweetCheckBox.innerHTML = '';
+        }
+      },
+      error: function(err, xhr, msg) {}
+    })
+  })
+
+  $("#replyText").keyup(function(){
+    var inputLength = $(this).val().length;
+    $(".reply-actual").text(inputLength);
+  })
+</script>

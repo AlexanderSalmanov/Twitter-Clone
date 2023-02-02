@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load bootstrap5 %}
+{% load socialaccount %}
+{% block title %}Signup{% endblock title %}
+
+{% block content %}
+    <main class="my-3 auth-form-box">
+        <div class="p-3 fs-2 bg-success text-white rounded">
+            <h1 class="display-5">Welcome to the Signup page!</h1>
+        </div>
+
+        <form action="/accounts/google/login/" id="google-oauth-form" method="POST">
+            {% csrf_token %}
+        </form>
+
+        <form method="POST" class="shadow p-3">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text pb-3" id="email-prefix"><i class="fa fa-envelope"></i></span>
+                </div>
+                {{form.email}}
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="fullname-prefix">Full Name</span>
+                </div>
+                {{form.full_name}}
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label for="id_password" class="form-label">Enter password:</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text pb-3 pw1-eye-box" id="pw1-prefix"><i class="fa fa-eye-slash passwordVisibility" onclick="passwordTrigger();"></i></span>
+                        </div>
+                        {{form.password}}
+                    </div>
+                </div>
+                <div class="col">
+                    <label for="id_password_2" class="form-label">Confirm password:</label>
+                    {{form.password_2}}
+                </div>
+            </div>
+            <div class="d-grid gap-3">
+                <button type="submit" class="btn btn-success">Sign Up</button>
+                <button type="submit" form="google-oauth-form" class="btn btn-success w-100"><i class="fa fa-google"></i> Sign Up with Google</button>
+            </div>
+        </form>
+
+        {% if form.errors %}
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <button class="btn btn-close" data-bs-dismiss="alert"></button>
+            {% for key, value in form.errors.items %}
+                <strong>{{ value }}</strong>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <small class="text-muted">Already have an account? <a href="{% url 'authentication:login' %}">Log In.</a></small>
+    </main>
+{% endblock content %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Check Tweet{% endblock title %}
+
+{% block content %}
+    {% include 'tweets/snippets/tweet.html' with tweet=tweet %}
+    {% for tweet in tweet_replies %}
+        <div class="row">
+            <div class="col-1">
+
+            </div>
+            <div class="col">
+                {% include 'tweets/snippets/tweet.html' with tweet=tweet %}
+            </div>
+        </div>
+    {% empty %}
+    <h3>No replies to this tweet. Be the first one to reply!</h3>
+    {% endfor %}
+{% endblock content %}

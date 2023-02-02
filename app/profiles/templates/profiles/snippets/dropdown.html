@@ -1,0 +1,40 @@
+{% load static %}
+<div class="dropdown" id="{{dropdown_id}}">
+    <button class="btn btn-outline-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="{% if dropdown_id == 'reading_id' %}reading-count{% elif dropdown_id == 'followers_id' %}followers-count{% endif %}">
+                <i class='fa fa-address-book'></i> 
+                {{count}}
+            </span> 
+        {{dropdown_title}} 
+        {% if profile in current_profile.reading_whom.all and dropdown_id == 'followers_id' %}<i class="fa fa-check"></i> {% endif %}
+    </button>
+    <ul class="dropdown-menu people-dropdown">
+      {% if dropdown_id == "reading_id" %}
+        {% for entry_profile in profile.reading_whom.all %}
+            <li class="dropdown-item">
+                <img src="{% if entry_profile.profile_pic %}{{entry_profile.profile_pic.url}}{% else %}{% static 'images/no_photo_placeholder.png' %}{% endif %}" class="profile-pic-thumbnail-xxs">
+                <a href="{% if entry_user == request.user %}{% url 'profiles:my' %}{% else %}{{entry_profile.get_absolute_url}}{% endif %}" class="profile-list-item">
+                    {{entry_profile.nickname}} 
+                </a> {% if current_profile == entry_profile %}(You){% endif %}
+            </li>{% if not forloop.counter == profile.reading_count %} <hr class="dropdown-divider">{% endif %}
+        {% empty %}
+            <li class="dropdown-item disabled">
+                No followed profiles yet.
+            </li>
+        {% endfor %}
+      {% elif dropdown_id == "followers_id" %}
+        {% for entry_profile in profile.followers_who.all %}
+            <li class="dropdown-item">
+                <img src="{% if entry_profile.profile_pic %}{{entry_profile.profile_pic.url}}{% else %}{% static 'images/no_photo_placeholder.png' %}{% endif %}" class="profile-pic-thumbnail-xxs">
+                <a href="{% if entry_profile == request.user.profile %}{% url 'profiles:my' %}{% else %}{{entry_profile.get_absolute_url}}{% endif %}" class="profile-list-item">
+                    {{entry_profile.nickname}} 
+                </a> {% if request.user.profile == entry_profile %}(You){% endif %}
+            </li>{% if not forloop.counter == profile.followers_count %} <hr class="dropdown-divider">{% endif %}
+        {% empty %}
+            <li class="dropdown-item disabled">
+                No followers yet.
+            </li>
+        {% endfor %}
+      {% endif %}
+    </ul>
+  </div>

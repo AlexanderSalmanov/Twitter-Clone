@@ -1,0 +1,16 @@
+[
+{
+    "model": "socialaccount.socialapp",
+    "pk": 1,
+    "fields": {
+        "provider": "google",
+        "name": "twitter-oauth",
+        "client_id": "929402932047-ru4072b6uhknu2nj9j7ptptaees2cvl6.apps.googleusercontent.com",
+        "secret": "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",
+        "key": "",
+        "sites": [
+            6
+        ]
+    }
+}
+]

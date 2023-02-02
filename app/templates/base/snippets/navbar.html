@@ -1,0 +1,62 @@
+{% url 'feed' as feed_url %}
+{% url 'profiles:my' as my_profile_url %}
+{% url 'profiles:followed' as followed_url %}
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <i class="fa fa-twitter"></i> someTwi
+      {% if user.is_authenticated %}
+      | <span class="navbar-profile-link">
+          {% if user.profile.profile_pic %}
+            <img src="{{user.profile.profile_pic.url}}" class="profile-pic-thumbnail-xxs" alt="">
+          {% endif %}
+          {{user.profile.nickname}}
+        </span>
+      {% endif %}
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel"><i class="fa fa-cogs"></i> Site navigation</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item">
+              <a href="/" class="nav-link {% if request.path == feed_url %}active{% endif %}"><i class="fa fa-globe"></i> Feed</a>
+            </li>
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == my_profile_url %}active{% endif %}" aria-current="page" href="{% url 'profiles:my' %}"><i class="fa fa-home"></i> My Profile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == followed_url %}active{% endif %}" aria-current="page" href="{% url 'profiles:followed' %}"><i class="fa fa-users"></i> Followed Profiles</a>
+            </li>
+            {% endif %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-user-circle"></i> Authentication
+              </a>
+              <ul class="dropdown-menu dropdown-menu-dark">
+                {% if user.is_authenticated %}
+                <li><a class="dropdown-item" href="{% url 'authentication:logout' %}"><i class="fa fa-sign-out"></i> Log out</a></li>
+                <li><a class="dropdown-item" href="{% url 'authentication:password-reset' %}"><i class="fa fa-key"></i> Reset password</a></li>
+                {% else %}
+                <li><a class="dropdown-item" href="{% url 'authentication:login' %}"><i class="fa fa-sign-in"></i> Log In</a></li>
+                <li><a class="dropdown-item" href="{% url 'authentication:signup' %}"><i class="fa fa-plus"></i> Create an account</a></li>
+                {% endif %}
+              </ul>
+            </li>
+          </ul>
+          <hr>
+          <h3 class="text-muted">Find users that interest you!</h3>
+          <form class="d-flex mt-3 search-form" role="search" action="{% url 'profiles:search' %}">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search-q">
+            <button class="btn btn-success search-btn" type="submit"><i class='fa fa-search'></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </nav>
